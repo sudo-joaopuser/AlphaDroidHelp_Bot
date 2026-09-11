@@ -3,7 +3,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
 
 def get_download_links(device_code):
-    device_code = device_code.lower().strip()
+    device_code = device_code.strip()
     
     json_url = f"https://raw.githubusercontent.com/AlphaDroid-devices/OTA/alpha-16.1/{device_code}.json"
     changelog_url = f"https://github.com/AlphaDroid-devices/OTA/blob/alpha-16.1/changelog_{device_code}.txt"
