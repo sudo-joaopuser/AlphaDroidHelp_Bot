@@ -1,0 +1,10 @@
+name: alphadroidhelp
+
+services:
+  bot:
+    build:
+      context: ${ALPHADROID_BOT_HOME:-https://github.com/mnirn/AlphaDroidHelp_Bot.git}
+      pull: true
+
+    volumes:
+      - ./token.txt:/app/token.txt:ro
