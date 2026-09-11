@@ -1,4 +1,5 @@
 import cachetools.func
+import datetime as dt
 import requests
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
@@ -38,8 +39,12 @@ def get_download_links(device_code):
         
         try:
             major_version = float(version.split(".")[0])
-            status_icon = "🟢" if major_version >= 2 else "🔴"
-            status_text = "Active" if major_version >= 2 else "Inactive"
+            default_version = float(default_branch.split("-")[1]) // 1
+            release_date = dt.date.fromtimestamp(first_entry.get("timestamp", 0))
+            status_icon = "🔴"
+            if major_version >= default_version - 12 or dt.date.today() - release_date <= dt.timedelta(180):
+                status_icon = "🟢"
+            status_text = "Active" if status_icon == "🟢" else "Inactive"
         except (ValueError, IndexError):
             status_icon, status_text = "⚪", "Unknown"
 
@@ -51,6 +56,7 @@ def get_download_links(device_code):
         message = (
             f"✅ *Latest AlphaDroid for {device_code}:*\n\n"
             f"📱 Version: *{version}*\n"
+            f"🗓 Release date: *{release_date.isoformat()}*\n"
             f"{status_icon} Status: *{status_text}*\n"
             f"🛠 Build Types: *{', '.join(build_types)}*\n"
             f"🧑‍💻 Maintainer: *{maintainer}*\n"
