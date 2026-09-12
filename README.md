@@ -21,6 +21,12 @@ Absolutely! Here's an updated and more detailed **"How to Use"** section for you
 
 Follow these steps to get the AlphaDroidHelp Bot up and running on your machine:
 
+### 0. Shortcut: `docker compose up --build`
+
+There is a [`docker-compose.yaml`](./docker-compose.yaml), just use it!
+
+Or go for the long way!
+
 ### 1. **Clone the Repository**
 ```bash
 git clone https://github.com/mnasibzade/AlphaDroidHelp_Bot

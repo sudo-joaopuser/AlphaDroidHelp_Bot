@@ -1,12 +1,24 @@
+import cachetools.func
+import datetime as dt
 import requests
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
 
+@cachetools.func.ttl_cache(maxsize=128, ttl=1 * 60 * 60)
+def get_default_branch(owner, repo):
+    rest_url = f"https://api.github.com/repos/{owner}/{repo}"
+
+    response = requests.get(rest_url, timeout=10)
+    response.raise_for_status()
+    data = response.json()
+    return data.get("default_branch", "16.2")
+
 def get_download_links(device_code):
-    device_code = device_code.lower().strip()
-    
-    json_url = f"https://raw.githubusercontent.com/AlphaDroid-devices/OTA/alpha-16.1/{device_code}.json"
-    changelog_url = f"https://github.com/AlphaDroid-devices/OTA/blob/alpha-16.1/changelog_{device_code}.txt"
+    device_code = device_code.strip()
+    default_branch = get_default_branch("AlphaDroid-devices", "OTA")
+
+    json_url = f"https://raw.githubusercontent.com/AlphaDroid-devices/OTA/{default_branch}/{device_code}.json"
+    changelog_url = f"https://github.com/AlphaDroid-devices/OTA/blob/{default_branch}/changelog_{device_code}.txt"
 
     try:
         response = requests.get(json_url, timeout=10)
@@ -27,8 +39,12 @@ def get_download_links(device_code):
         
         try:
             major_version = float(version.split(".")[0])
-            status_icon = "🟢" if major_version >= 2 else "🔴"
-            status_text = "Active" if major_version >= 2 else "Inactive"
+            default_version = float(default_branch.split("-")[1]) // 1
+            release_date = dt.date.fromtimestamp(first_entry.get("timestamp", 0))
+            status_icon = "🔴"
+            if major_version >= default_version - 12 or dt.date.today() - release_date <= dt.timedelta(180):
+                status_icon = "🟢"
+            status_text = "Active" if status_icon == "🟢" else "Inactive"
         except (ValueError, IndexError):
             status_icon, status_text = "⚪", "Unknown"
 
@@ -40,6 +56,7 @@ def get_download_links(device_code):
         message = (
             f"✅ *Latest AlphaDroid for {device_code}:*\n\n"
             f"📱 Version: *{version}*\n"
+            f"🗓 Release date: *{release_date.isoformat()}*\n"
             f"{status_icon} Status: *{status_text}*\n"
             f"🛠 Build Types: *{', '.join(build_types)}*\n"
             f"🧑‍💻 Maintainer: *{maintainer}*\n"
