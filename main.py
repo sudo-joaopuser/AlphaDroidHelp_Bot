@@ -13,6 +13,7 @@ from bot.source import source
 from bot.contribute import contribute
 from bot.apply import apply
 from bot.devices import devices
+from bot.ping import ping
 
 def read_token():
     try:
@@ -46,6 +47,7 @@ def main():
     app.add_handler(CommandHandler("contribute", contribute))
     app.add_handler(CommandHandler("apply", apply))
     app.add_handler(CommandHandler("devices", devices))
+    app.add_handler(CommandHandler("ping", ping))
     app.add_error_handler(error_handler)
 
     app.run_polling()
